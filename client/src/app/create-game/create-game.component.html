@@ -1,0 +1,30 @@
+<div class='container'>
+  <h1>Cards Against Isolation</h1>
+  <form>
+    <div class='row'>
+      <div class='form-group'>
+        <label for='gameId'>Game Name:</label>
+        <input type='text' class='form-control' id='gameId' name='gameId' placeholder='myname-game-from-home' [(ngModel)]="gameId"/>
+        <small class='form-text text-muted'>Choose a name for the game that you can give to your friends.</small>
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='form-group'>
+        Choose Decks: ({{ cardCount }} cards)<br />
+        <div class='form-check' *ngFor="let deck of decks">
+          <input class='form-check-input' type='checkbox' [value]='deck.id' [id]='"deck-" + deck.id' name="enabledDecks" [checked]="deck.checked" (change)="toggleDeck(deck.id)">
+          <label class='form-check-label' [for]='"deck-" + deck.id'>
+            {{deck.id}} - {{ deck.name }}
+            <span *ngIf="deck.official"><strong>(Official)</strong></span>
+            <span *ngIf="!deck.official">(Community)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class='row'>
+      <button (click)="startGame()" class='btn btn-primary'>Start Game</button>
+    </div>
+  </form>
+</div>

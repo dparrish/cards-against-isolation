@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@500&display=swap');
+
+.player {
+}
+
+.play-cards {
+  position: abolute;
+  top: 50%;
+  height: 16rem;
+}
+
+.play-cards .game-card {
+  margin-left: 0.5rem;
+}
+
+.game-card {
+  border: 1px solid black;
+  min-width: 12rem;
+  width: 12rem;
+  height: 16rem;
+  padding: 0.5rem;
+  border-radius: 0.8rem;
+  font-family: 'Roboto', sans-serif;
+  line-height: normal;
+  text-overflow: hidden;
+  cursor: default;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.card-icon {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.black-card {
+  background-color: black;
+  color: white;
+}
+
+.white-card {
+  color: black;
+  background-color: white;
+}
+
+.my-cards {
+  padding-bottom: 0.5em;
+}
+
+.scoreboard {
+  width: 15rem;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+

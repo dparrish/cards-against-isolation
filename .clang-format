@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+IndentWidth: 2
+---
+
+Language: JavaScript
+ColumnLimit: 180
+AllowShortFunctionsOnASingleLine: Empty
+

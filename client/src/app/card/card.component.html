@@ -1,0 +1,8 @@
+<div #card class="game-card flip-card" [class]="className" [style]="{'font-size': fontSize}" (click)="toggle()">
+  <div class="flip-card-inner">
+    <div class="flip-card-front" [class]="cardClass" [innerHTML]="content"></div>
+    <div class="flip-card-back" [class]="cardClass">
+      Cards Against Isolation
+    </div>
+  </div>
+</div>

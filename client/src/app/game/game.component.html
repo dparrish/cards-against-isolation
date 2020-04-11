@@ -1,0 +1,95 @@
+<div class='container-fluid'>
+  <h1>Cards Against Isolation</h1>
+  <div class='d-flex align-items-center'>
+    <div><a href="http://s3.amazonaws.com/cah/CAH_Rules.pdf" target="_">Official Rules</a>&nbsp;|&nbsp;</div>
+    <div>My name: <a href='#' id='playerName' (click)="editName(changeNameModal)">{{ playerName }}</a> (click to change)</div>
+  </div>
+
+  <ng-template #changeNameModal let-modal>
+    <div class="modal-body">
+      <p>Enter your name:</p>
+      <input type='text' [(ngModel)]='playerName' />
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="modal.close('save')">Update</button>
+      <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="modal.close('cancel')">Cancel</button>
+    </div>
+  </ng-template>
+
+  <div *ngIf='players.length == 1' style='text-align: center; font-size: 3rem;'>
+    Waiting for more players.
+  </div>
+
+  <div *ngIf="game.state == 'choose_winner'">
+    <div class='d-flex flex-row justify-content-left align-items-center' *ngFor="let player of randomizedPlayers">
+      <ng-container *ngIf="!player.czar">
+        <div *ngIf='czar == playerId' class='mr-5'>
+          <button (click)="chooseWinner(player.id)" class="btn btn-primary">Winner!</button>
+        </div>
+        <app-card [black]='true' class='mr-5' [content]="blackCard"></app-card>
+        <app-card *ngFor="let card of player.playedCards" [content]="card"></app-card>
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="game.state == 'play'">
+    <div class='scoreboard'>
+      <table class='table table-bordered table-sm'>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of game.players">
+            <td>
+              <fa-icon [icon]="waitIcon(player.id)"></fa-icon>
+              {{ player.name }}
+              <span *ngIf="player.czar"> (Czar)</span>
+              <span *ngIf="playerId == game.owner">
+                [ <a href='#' (click)='kickPlayer(player.id)'>Kick</a> ]
+              </span>
+            </td>
+            <td>{{ player.score }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf='players.length > 1'>
+      <app-card [black]='true' class='mx-auto' [content]="blackCard"></app-card>
+
+      <div *ngIf='czar == playerId' class='mx-auto' style='font-size: 2rem; text-align: center;'>
+        <b>You are the Card Czar this round.</b><br />
+        <br />
+        <div *ngIf="waiting.length">
+          Waiting for {{ waiting.length }} players to play cards.
+          <li *ngFor="let player of waiting">
+            {{ player.name }}
+            <span *ngIf="playersById[player.id].away">(disconnected)</span>
+          </li>
+          <button *ngIf="waiting.length != players.length - 1" (click)="endThisRound()" class='btn btn-primary'>End Round Early</button>
+        </div>
+        <div *ngIf="!waiting.length">
+          All players are ready.<br />
+          <button (click)="endThisRound()" class='btn btn-primary'>Choose Winner</button>
+        </div>
+      </div>
+
+      <div *ngIf='czar != playerId'>
+        <div class='play-cards' *ngIf="playedCards.length">
+          <h3 *ngIf="cardsToPlay == 1">Play this card</h3>
+          <h3 *ngIf="cardsToPlay > 1">Play these cards</h3>
+          <div class='d-flex flex-row flex-wrap justify-content-center'>
+            <app-card *ngFor="let card of playedCards" [black]='false' [content]="card"></app-card>
+          </div>
+        </div>
+
+        <div class='my-cards d-flex flex-row flex-wrap justify-content-around fixed-bottom'>
+          <app-card *ngFor="let card of myCards" (click)="playCard(card)" [content]="card"></app-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
