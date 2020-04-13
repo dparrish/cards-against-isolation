@@ -181,7 +181,6 @@ export class CardServer {
       player.away = false;
       player.socket = socket;
       player.socketId = socket.id;
-      // player.playedCards = [];
       this.broadcastGame(game);
     }
     this.broadcastGame(game);
@@ -306,7 +305,6 @@ export class CardServer {
       })
       game.vote = null;
     }, game.vote.timeout * 1000);
-    console.log(game.vote.votes);
     console.log(`Start vote "${game.vote.title} - ${game.vote.required} votes required to pass`);
   }
 
@@ -321,7 +319,6 @@ export class CardServer {
     })
     // See if there is a resolution.
     console.log(`Got a vote "${m.text}" for "${game.vote.title}"`);
-    console.log(game.vote.votes);
     const required = Math.ceil(this.availablePlayers(game) / 2);
     console.log(`  required ${required} to resolve`);
     const results = _.uniq(Object.values(game.vote.votes));
@@ -338,6 +335,13 @@ export class CardServer {
       if (result == 'yes') {
         if (game.vote.args.type == 'kick-player') {
           this.kickPlayer(game, game.vote.args.player);
+        } else if (game.vote.args.type == 'skip-card') {
+          for (const player of game.players) {
+            player.playedCards = [];
+          }
+          game.state = 'play';
+          this.drawBlackCard(game);
+          this.broadcastGame(game);
         }
         this.broadcast(game, {
           event: 'vote_passed',
@@ -418,7 +422,6 @@ export class CardServer {
     } `);
       return
     }
-    this.broadcastGame(game);
   }
 
   playerDrawCards(game: Game, player: Player) {

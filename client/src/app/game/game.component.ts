@@ -282,11 +282,24 @@ export class GameComponent implements OnInit {
     return false;
   }
 
+  skipCard() {
+    this.socket.send({
+      event: 'start_vote',
+      player: this.playerId,
+      game: this.gameId,
+      text: `Skip this card`,
+      args: {
+        type: 'skip-card',
+        timeout: 30,
+      },
+    });
+    return false;
+  }
+
   kickPlayer(id: string) {
     this.socket.send({
       event: 'start_vote',
       player: this.playerId,
-      winner: id,
       game: this.gameId,
       text: `Kick ${this.playersById[id].name}`,
       args: {

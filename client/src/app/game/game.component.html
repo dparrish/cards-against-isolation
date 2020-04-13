@@ -2,7 +2,9 @@
   <h1>Cards Against Isolation</h1>
   <div class='d-flex align-items-center'>
     <div><a href="http://s3.amazonaws.com/cah/CAH_Rules.pdf" target="_">Official Rules</a>&nbsp;|&nbsp;</div>
-    <div>My name: <a href='#' id='playerName' (click)="editName(changeNameModal)">{{ playerName }}</a> (click to change)</div>
+    <div>My name: <a href='#' id='playerName' (click)="editName(changeNameModal)">{{ playerName }}</a> (click to change)&nbsp;|&nbsp;</div>
+    <div><a href='#' (click)="skipCard()">Skip This Card</a></div>
+
   </div>
 
   <app-toasts aria-live="polite" aria-atomic="true"></app-toasts>
