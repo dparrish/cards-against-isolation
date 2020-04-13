@@ -14,6 +14,9 @@ import {CardComponent} from './card/card.component';
 import {CreateGameComponent} from './create-game/create-game.component';
 import {GameComponent} from './game/game.component';
 import {ToastsContainer} from './toasts-container.component';
+import { GameBoardComponent } from './game-board/game-board.component';
+import { CongratulationsComponent } from './congratulations/congratulations.component';
+import { ChooseWinnerComponent } from './choose-winner/choose-winner.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +25,9 @@ import {ToastsContainer} from './toasts-container.component';
     GameComponent,
     CardComponent,
     ToastsContainer,
+    GameBoardComponent,
+    CongratulationsComponent,
+    ChooseWinnerComponent,
   ],
   imports: [
     BrowserModule,

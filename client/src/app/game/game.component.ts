@@ -3,6 +3,7 @@ import {Component, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {faCheckCircle, faTimesCircle} from '@fortawesome/free-regular-svg-icons';
 import {ModalDismissReasons, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {Howl, Howler} from 'howler';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -52,10 +53,18 @@ export class GameComponent implements OnInit {
   czar = '';
   decks = ['Base', 'Box'];
   vote: any = {};
+  winner: any = null;
+  sfx = {
+    cheer: null,
+    shuffle: null,
+  };
 
   constructor(
       private route: ActivatedRoute, private router: Router, private cookie: CookieService, private socket: SocketService, private modalService: NgbModal,
-      private toast: ToastService) {}
+      private toast: ToastService) {
+    this.sfx.cheer = new Howl({src: ['/assets/sfx/5_Sec_Crowd_Cheer-Mike_Koenig-1562033255.mp3'], preload: true, volume: 0.25});
+    this.sfx.shuffle = new Howl({src: ['/assets/sfx/Cards Shuffling-SoundBible.com-565963092.mp3'], preload: true, volume: 0.25});
+  }
 
   ngOnInit() {
     this.playerId = this.getPlayerId();
@@ -112,6 +121,15 @@ export class GameComponent implements OnInit {
         if (this.game.state == 'choose_winner') {
           this.playedCards = [];
         }
+      } else if (message.event == 'end_round') {
+        this.winner = {
+          player: this.playersById[message.winner].name,
+          blackCard: message.args.blackCard,
+          playedCards: message.args.playedCards,
+          score: message.args.score,
+          nextCzar: this.playersById[message.args.nextCzar].name,
+        };
+        this.sfx.cheer.play();
       } else if (message.event == 'invalid_game') {
         this.router.navigate([`/create`]);
       } else if (message.event == 'game_created') {
@@ -157,6 +175,11 @@ export class GameComponent implements OnInit {
 
   get cardsToPlay(): number {
     return (this.game.blackCard.match(/_/g) || []).length || 1;
+  }
+
+  nextRound() {
+    this.winner = null;
+    this.sfx.shuffle.play();
   }
 
   get cardSlots(): string[] {

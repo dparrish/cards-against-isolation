@@ -1,0 +1,14 @@
+<!-- Round Win screen -->
+<div class='d-flex flex-column justify-content-center align-items-center' style='height: 100%;'>
+  <h1>Round Over</h1>
+  <h2>The winner is {{ winner }}!</h2>
+
+  <div class='d-flex justify-content-center my-5'>
+    <app-card [black]='true' [content]="blackCard" class="mr-4"></app-card>
+    <app-card *ngFor="let card of cards" [black]='false' [content]="card" class="mr-2"></app-card>
+  </div>
+
+  <h2>New score is {{ score }}.</h2>
+  <h2>The next Card Czar is {{ nextCzar }}.</h2>
+  <button class='btn btn-primary btn-lg' (click)="nextRound()">Next Round</button>
+</div>

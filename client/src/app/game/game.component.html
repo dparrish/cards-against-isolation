@@ -1,10 +1,11 @@
-<div class='container-fluid'>
+<app-congratulations *ngIf="winner" [winner]="winner.name" [score]="winner.score" [blackCard]="winner.blackCard" [cards]="winner.playedCards" [nextCzar]="winner.nextCzar" (done)="nextRound()"></app-congratulations>
+
+<div *ngIf="!winner" class='container-fluid'>
   <h1>Cards Against Isolation</h1>
   <div class='d-flex align-items-center'>
     <div><a href="http://s3.amazonaws.com/cah/CAH_Rules.pdf" target="_">Official Rules</a>&nbsp;|&nbsp;</div>
     <div>My name: <a href='#' id='playerName' (click)="editName(changeNameModal)">{{ playerName }}</a> (click to change)&nbsp;|&nbsp;</div>
     <div><a href='#' (click)="skipCard()">Skip This Card</a></div>
-
   </div>
 
   <app-toasts aria-live="polite" aria-atomic="true"></app-toasts>
@@ -82,10 +83,9 @@
     </div>
 
     <div *ngIf='players.length > 1'>
-      <div *ngIf='czar == playerId' class='mx-auto' style='font-size: 2rem; text-align: center;'>
-        <app-card [black]='true' class='mx-auto' [content]="blackCard"></app-card>
+      <div *ngIf='czar == playerId' style='font-size: 2rem;' class='d-flex flex-column align-items-center'>
+        <app-card [black]='true' [content]="blackCard"></app-card>
         <b>You are the Card Czar this round.</b><br />
-        <br />
         <div *ngIf="waiting.length">
           Waiting for {{ waiting.length }} players to play cards.
           <li *ngFor="let player of waiting">

@@ -223,18 +223,32 @@ export class CardServer {
     if (game.czar != m.player) {
       console.log(`Player ${m.player} tried to end round, but czar is ${game.czar}`);
     }
+    const update = {
+      event: 'end_round',
+      winner: m.winner,
+      args: {
+        blackCard: game.blackCard,
+        playedCards: [],
+        score: 0,
+        nextCzar: '',
+      },
+    };
     for (const player of game.players) {
       for (const playedCard of player.playedCards) {
         // Remove played cards.
         _.remove(player.cards, c => c == playedCard);
       }
-      player.playedCards = [];
-      this.playerDrawCards(game, player);
       if (player.id == m.winner) {
         player.score++;
+        update.args.playedCards = player.playedCards;
+        update.args.score = player.score;
       }
+      player.playedCards = [];
+      this.playerDrawCards(game, player);
     }
     this.nextCzar(game);
+    update.args.nextCzar = game.czar;
+    this.broadcast(game, update);
     game.state = 'play';
     this.drawBlackCard(game);
     this.broadcastGame(game);
