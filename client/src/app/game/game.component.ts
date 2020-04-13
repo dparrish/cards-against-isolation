@@ -36,7 +36,6 @@ export class GameComponent implements OnInit {
   myCards: string[] = [];
   blackCard: string;
   playedCards: string[] = [];
-  cardsToPlay: number;
   cardsPlayed: any = {};
   waiting: any[] = [];
   cards = {
@@ -98,7 +97,6 @@ export class GameComponent implements OnInit {
 
         // Update black card.
         this.blackCard = this.game.blackCard;
-        this.cardsToPlay = (this.game.blackCard.match(/_/g) || []).length || 1;
         this.cardsPlayed = {};
 
         this.updateWaiting();
@@ -119,6 +117,10 @@ export class GameComponent implements OnInit {
         console.log(`Unknown message`, message);
       }
     });
+  }
+
+  get cardsToPlay(): number {
+    return (this.game.blackCard.match(/_/g) || []).length || 1;
   }
 
   public updateWaiting() {
@@ -156,7 +158,6 @@ export class GameComponent implements OnInit {
   newBlackCard() {
     const card = this.cards.black[0];
     this.blackCard = card;
-    this.cardsToPlay = (card.match(/_/g) || []).length || 1;
   }
 
   getWhiteCards() {

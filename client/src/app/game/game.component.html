@@ -22,14 +22,20 @@
 
   <!-- Choose Winner Screen -->
   <div *ngIf="game.state == 'choose_winner'">
-    <div class='d-flex flex-row justify-content-left align-items-center' *ngFor="let player of randomizedPlayers">
-      <ng-container *ngIf="!player.czar && player.playedCards.length">
-        <div *ngIf='czar == playerId' class='mr-5'>
-          <button (click)="chooseWinner(player.id)" class="btn btn-primary">Winner!</button>
-        </div>
-        <app-card [black]='true' class='mr-5' [content]="blackCard"></app-card>
-        <app-card *ngFor="let card of player.playedCards" [content]="card"></app-card>
-      </ng-container>
+    <div class='d-flex flex-row justify-content-center mb-3'>
+      <app-card [black]='true' [content]="blackCard"></app-card>
+    </div>
+    <div class='d-flex flex-row justify-content-center'>
+      <div class='d-flex flex-column align-items-center' *ngFor="let player of randomizedPlayers">
+        <ng-container *ngIf="!player.czar && player.playedCards.length">
+          <div *ngIf='czar == playerId'>
+            <button (click)="chooseWinner(player.id)" class="btn btn-primary">Winner!</button>
+          </div>
+          <div class='m-2'>
+            <app-card *ngFor="let card of player.playedCards" [content]="card"></app-card>
+          </div>
+        </ng-container>
+      </div>
     </div>
   </div>
 
