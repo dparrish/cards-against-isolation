@@ -87,7 +87,10 @@ export class GameComponent implements OnInit {
           this.myCards = player.cards;
         }
         this.players = this.game.players;
-        this.randomizedPlayers = _.shuffle(this.game.players);
+        // Don't really randomize, just sort by the first card. It's not in the
+        // same player order every time at least, and it's stable between
+        // refreshes.
+        this.randomizedPlayers = _.sortBy(this.game.players, p => p.playedCards[0]);
         this.playersById = {};
         for (const player of this.players) {
           this.playersById[player.id] = player;

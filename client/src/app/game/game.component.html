@@ -20,9 +20,10 @@
     Waiting for more players.
   </div>
 
+  <!-- Choose Winner Screen -->
   <div *ngIf="game.state == 'choose_winner'">
     <div class='d-flex flex-row justify-content-left align-items-center' *ngFor="let player of randomizedPlayers">
-      <ng-container *ngIf="!player.czar">
+      <ng-container *ngIf="!player.czar && player.playedCards.length">
         <div *ngIf='czar == playerId' class='mr-5'>
           <button (click)="chooseWinner(player.id)" class="btn btn-primary">Winner!</button>
         </div>
