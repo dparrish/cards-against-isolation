@@ -44,6 +44,9 @@ export class CardComponent implements OnInit {
   }
 
   get fontSize(): string {
+    if (!this.content) {
+      return '2rem';
+    }
     const base = 0.8;
     if (this.content.length > 150) {
       return base * 1.4 + 'rem';

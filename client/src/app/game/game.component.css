@@ -4,22 +4,42 @@
 }
 
 .play-cards {
-  flex-grow: 1;
-  transition: all 1s;
 }
 
-.play-cards :app-card {
-  flex-grow: 1;
-  transition: all 1s;
+.card-slot {
+  width: 12rem;
+  height: 16rem;
+  font-size: 6rem;
+  color: lightgrey;
+  border: 1px solid lightgrey;
+  border-radius: 0.8rem;
+  margin: 0px;
 }
 
 .play-cards .game-card {
   flex-grow: 1;
-  transition: all 1s;
+  flex-shrink: 1;
+  transition: all 1s ease;
+  cursor: grab;
+  margin-right: 1em;
+}
+
+.play-cards .black-card {
+  cursor: default;
+}
+
+.play-cards .empty-card {
+  cursor: not-allowed;
 }
 
 .my-cards {
-  padding-bottom: 0.5em;
+  padding-bottom: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.my-cards .game-card {
+  cursor: grab;
 }
 
 .scoreboard {

@@ -1,5 +1,5 @@
-import {animate, state, style, transition, trigger,} from '@angular/animations';
-import {Component, OnInit} from '@angular/core';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {faCheckCircle, faTimesCircle} from '@fortawesome/free-regular-svg-icons';
 import {ModalDismissReasons, NgbModal} from '@ng-bootstrap/ng-bootstrap';
@@ -24,6 +24,7 @@ interface Player {
   selector: 'app-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class GameComponent implements OnInit {
   title = 'Cards Against Isolation';
@@ -123,6 +124,18 @@ export class GameComponent implements OnInit {
     return (this.game.blackCard.match(/_/g) || []).length || 1;
   }
 
+  get cardSlots(): string[] {
+    const slots = [];
+    for (let i = 0; i < this.cardsToPlay; i++) {
+      if (this.playedCards[i]) {
+        slots[i] = this.playedCards[i];
+      } else {
+        slots[i] = null;
+      }
+    }
+    return slots;
+  }
+
   public updateWaiting() {
     this.waiting = [];
     for (const player of this.players) {
@@ -174,6 +187,11 @@ export class GameComponent implements OnInit {
     this.playedCards.push(card);
     if (this.playedCards.length > this.cardsToPlay) {
       this.playedCards = this.playedCards.slice(1, this.cardsToPlay + 1);
+    }
+    for (let i = 0; i < this.cardSlots.length; i++) {
+      if (this.cardSlots[i]) continue;
+      this.cardSlots[i] = card;
+      break;
     }
     this.socket.send({
       event: 'play_card',

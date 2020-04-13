@@ -86,7 +86,7 @@
       <div *ngIf='czar != playerId'>
         <div class='play-cards d-flex justify-content-center'>
           <app-card [black]='true' [content]="blackCard"></app-card>
-          <app-card *ngFor="let card of playedCards" [black]='false' [content]="card" (click)="removeCard(card)"></app-card>
+          <app-card *ngFor="let card of cardSlots; let i = index" [black]='false' [content]="card" (click)="removeCard(card)"></app-card>
         </div>
 
         <div class='my-cards d-flex flex-row flex-wrap justify-content-around fixed-bottom'>
