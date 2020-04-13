@@ -18,7 +18,6 @@ export class CardComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    console.log(this.black);
     if (this.black) {
       this.cardClass = 'black-card';
     } else {

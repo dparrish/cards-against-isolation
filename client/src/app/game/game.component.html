@@ -65,9 +65,8 @@
     </div>
 
     <div *ngIf='players.length > 1'>
-      <app-card [black]='true' class='mx-auto' [content]="blackCard"></app-card>
-
       <div *ngIf='czar == playerId' class='mx-auto' style='font-size: 2rem; text-align: center;'>
+        <app-card [black]='true' class='mx-auto' [content]="blackCard"></app-card>
         <b>You are the Card Czar this round.</b><br />
         <br />
         <div *ngIf="waiting.length">
@@ -85,12 +84,9 @@
       </div>
 
       <div *ngIf='czar != playerId'>
-        <div class='play-cards' *ngIf="playedCards.length">
-          <h3 *ngIf="cardsToPlay == 1">Play this card</h3>
-          <h3 *ngIf="cardsToPlay > 1">Play these cards</h3>
-          <div class='d-flex flex-row flex-wrap justify-content-center'>
-            <app-card *ngFor="let card of playedCards" [black]='false' [content]="card"></app-card>
-          </div>
+        <div class='play-cards d-flex justify-content-center'>
+          <app-card [black]='true' [content]="blackCard"></app-card>
+          <app-card *ngFor="let card of playedCards" [black]='false' [content]="card" (click)="removeCard(card)"></app-card>
         </div>
 
         <div class='my-cards d-flex flex-row flex-wrap justify-content-around fixed-bottom'>

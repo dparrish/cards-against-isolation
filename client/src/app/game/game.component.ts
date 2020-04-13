@@ -183,6 +183,17 @@ export class GameComponent implements OnInit {
     });
   }
 
+  removeCard(card: string) {
+    if (_.remove(this.playedCards, c => c == card)) {
+      this.socket.send({
+        event: 'play_card',
+        game: this.gameId,
+        player: this.playerId,
+        cards: this.playedCards,
+      });
+    }
+  }
+
   getPlayerId(): string {
     let id = this.cookie.get('player-id');
     if (!id) {
