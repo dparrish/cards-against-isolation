@@ -229,7 +229,7 @@ export class CardServer {
       }
 
       // Rotate the Czar.
-      if (nextCzar && !movedCzar) {
+      if (!player.away && nextCzar && !movedCzar) {
         game.czar = player.id;
         player.czar = true;
         nextCzar = false;
