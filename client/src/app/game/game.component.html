@@ -1,4 +1,4 @@
-<app-congratulations *ngIf="winner" [winner]="winner.name" [score]="winner.score" [blackCard]="winner.blackCard" [cards]="winner.playedCards" [nextCzar]="winner.nextCzar" (done)="nextRound()"></app-congratulations>
+<app-congratulations *ngIf="winner" [winner]="winner.winner" [score]="winner.score" [blackCard]="winner.blackCard" [cards]="winner.playedCards" [nextCzar]="winner.nextCzar" (done)="nextRound()"></app-congratulations>
 
 <div *ngIf="!winner" class='container-fluid'>
   <h1>Cards Against Isolation</h1>
@@ -85,14 +85,14 @@
     <div *ngIf='players.length > 1'>
       <div *ngIf='czar == playerId' style='font-size: 2rem;' class='d-flex flex-column align-items-center'>
         <app-card [black]='true' [content]="blackCard"></app-card>
-        <b>You are the Card Czar this round.</b><br />
+        <b>You are the card czar this round.</b><br />
         <div *ngIf="waiting.length">
           Waiting for {{ waiting.length }} players to play cards.
           <li *ngFor="let player of waiting">
             {{ player.name }}
             <span *ngIf="playersById[player.id].away">(disconnected)</span>
           </li>
-          <button *ngIf="waiting.length != players.length - 1" (click)="endThisRound()" class='btn btn-primary'>End Round Early</button>
+          <button *ngIf="waiting.length != players.length - 1" (click)="endThisRound()" class='btn btn-danger'>End Round Early</button>
         </div>
         <div *ngIf="!waiting.length">
           All players are ready.<br />

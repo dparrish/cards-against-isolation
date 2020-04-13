@@ -123,12 +123,14 @@ export class GameComponent implements OnInit {
         }
       } else if (message.event == 'end_round') {
         this.winner = {
-          player: this.playersById[message.winner].name,
+          winner: this.playersById[message.winner].name,
           blackCard: message.args.blackCard,
           playedCards: message.args.playedCards,
           score: message.args.score,
           nextCzar: this.playersById[message.args.nextCzar].name,
         };
+        console.log(message);
+        console.log(this.winner);
         this.sfx.cheer.play();
       } else if (message.event == 'invalid_game') {
         this.router.navigate([`/create`]);

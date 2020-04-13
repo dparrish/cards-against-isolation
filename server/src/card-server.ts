@@ -43,6 +43,8 @@ export class CardServer {
   private players: {[index: string]: Player} = {};
   private games: {[index: string]: Game} = {};
 
+  private rando: boolean = true;
+
   constructor() {
     this.createApp();
     this.port = process.env.PORT || CardServer.PORT;
@@ -80,6 +82,7 @@ export class CardServer {
               break;
             }
           }
+          this.updateRando(game);
           this.broadcastGame(game);
         }
       });
@@ -183,8 +186,35 @@ export class CardServer {
       player.socketId = socket.id;
       this.broadcastGame(game);
     }
+    this.updateRando(game);
     this.broadcastGame(game);
     this.playerDrawCards(game, player);
+  }
+
+  updateRando(game: Game) {
+    if (!this.rando) return;
+
+    let rando = _.find(game.players, p => p.id == 'rando');
+    if (game.players.length == 2) {
+      if (!rando) {
+        rando = {
+          id: 'rando',
+          name: `Rando`,
+          away: true,
+          score: 0,
+          cards: [],
+          czar: false,
+          playedCards: [],
+        };
+        game.players.push(rando);
+        this.playerDrawCards(game, rando);
+      }
+    }
+    if (rando) {
+      const cardsToPlay = (game.blackCard.match(/_/g) || []).length || 1;
+      rando.playedCards = _.sampleSize(rando.cards, cardsToPlay);
+      console.log(`Rando plays ${rando.playedCards}`);
+    }
   }
 
   broadcastGame(game: Game): void {
@@ -251,6 +281,7 @@ export class CardServer {
     this.broadcast(game, update);
     game.state = 'play';
     this.drawBlackCard(game);
+    this.updateRando(game);
     this.broadcastGame(game);
   }
 
