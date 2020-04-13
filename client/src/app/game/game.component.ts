@@ -1,16 +1,18 @@
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
+import {Component, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {faCheckCircle, faTimesCircle} from '@fortawesome/free-regular-svg-icons';
 import {ModalDismissReasons, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import {CookieService} from 'ngx-cookie-service';
 import * as card_data from 'src/json-against-humanity/full.md.json';
 import * as uuid from 'uuid';
 
 import {Message} from '../../message';
 import {SocketService} from '../socket.service';
+import {ToastService} from '../toast-service';
 
 interface Player {
   id: string;
@@ -27,6 +29,7 @@ interface Player {
   encapsulation: ViewEncapsulation.None,
 })
 export class GameComponent implements OnInit {
+  @ViewChild('voteModal') voteModal;
   title = 'Cards Against Isolation';
   gameId = 'abc123';
   playerId: string;
@@ -48,8 +51,11 @@ export class GameComponent implements OnInit {
   };
   czar = '';
   decks = ['Base', 'Box'];
+  vote: any = {};
 
-  constructor(private route: ActivatedRoute, private router: Router, private cookie: CookieService, private socket: SocketService, private modalService: NgbModal) {}
+  constructor(
+      private route: ActivatedRoute, private router: Router, private cookie: CookieService, private socket: SocketService, private modalService: NgbModal,
+      private toast: ToastService) {}
 
   ngOnInit() {
     this.playerId = this.getPlayerId();
@@ -74,7 +80,7 @@ export class GameComponent implements OnInit {
           for (const newplayer of message.game.players) {
             if (newplayer.id != player.id) continue;
             if (newplayer.score != player.score) {
-              console.log(`Score for ${newplayer.name} is now ${newplayer.score}`);
+              this.toast.show(`${newplayer.name} won that round!`);
             }
           }
         }
@@ -106,11 +112,40 @@ export class GameComponent implements OnInit {
         if (this.game.state == 'choose_winner') {
           this.playedCards = [];
         }
-
       } else if (message.event == 'invalid_game') {
         this.router.navigate([`/create`]);
+      } else if (message.event == 'game_created') {
       } else if (message.event == 'draw_card') {
         this.myCards.push(message.card);
+      } else if (message.event == 'vote_start') {
+        this.vote = {
+          title: message.args.title,
+          timeout: message.args.timeout,
+          required: message.args.required,
+          expires: moment().add(message.args.timeout, 'second'),
+        };
+        this.vote.timeLeft = Math.round(moment.duration(this.vote.expires.diff(moment())).as('seconds'));
+        this.vote.interval = setInterval(() => {
+          if (!this.vote) {
+            return;
+          }
+          this.vote.timeLeft = Math.round(moment.duration(this.vote.expires.diff(moment())).as('seconds'));
+        }, 1000);
+        this.modalService.open(this.voteModal);
+      } else if (message.event == 'vote_failed') {
+        if (this.vote) {
+          this.toast.show(`Vote to ${this.vote.title} did not pass`);
+          clearInterval(this.vote.interval);
+          this.modalService.dismissAll();
+          this.vote = {};
+        }
+      } else if (message.event == 'vote_passed') {
+        if (this.vote) {
+          this.toast.show(`Vote to ${this.vote.title} passed`);
+          clearInterval(this.vote.interval);
+          this.modalService.dismissAll();
+          this.vote = {};
+        }
       } else if (message.event == 'play_card') {
         this.cardsPlayed[message.player] = message.cards;
         this.updateWaiting();
@@ -249,10 +284,16 @@ export class GameComponent implements OnInit {
 
   kickPlayer(id: string) {
     this.socket.send({
-      event: 'kick_player',
+      event: 'start_vote',
       player: this.playerId,
       winner: id,
       game: this.gameId,
+      text: `Kick ${this.playersById[id].name}`,
+      args: {
+        type: 'kick-player',
+        player: id,
+        timeout: 30,
+      },
     });
     return false;
   }
@@ -341,5 +382,14 @@ export class GameComponent implements OnInit {
       }
     }
     return false;
+  }
+
+  castVote(option: string) {
+    this.socket.send({
+      event: 'vote',
+      player: this.playerId,
+      game: this.gameId,
+      text: option,
+    });
   }
 }

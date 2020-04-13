@@ -13,6 +13,7 @@ import {AppComponent} from './app.component';
 import {CardComponent} from './card/card.component';
 import {CreateGameComponent} from './create-game/create-game.component';
 import {GameComponent} from './game/game.component';
+import {ToastsContainer} from './toasts-container.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import {GameComponent} from './game/game.component';
     CreateGameComponent,
     GameComponent,
     CardComponent,
+    ToastsContainer,
   ],
   imports: [
     BrowserModule,

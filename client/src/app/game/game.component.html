@@ -5,6 +5,8 @@
     <div>My name: <a href='#' id='playerName' (click)="editName(changeNameModal)">{{ playerName }}</a> (click to change)</div>
   </div>
 
+  <app-toasts aria-live="polite" aria-atomic="true"></app-toasts>
+
   <ng-template #changeNameModal let-modal>
     <div class="modal-body">
       <p>Enter your name:</p>
@@ -19,6 +21,21 @@
   <div *ngIf='players.length == 1' style='text-align: center; font-size: 3rem;'>
     Waiting for more players.
   </div>
+
+  <ng-template #voteModal let-modal>
+    <div class="modal-header">
+      <h4 class='modal-totle'>Vote</h4>
+    </div>
+    <div class="modal-body">
+      <p>It's time to vote! The suggestion is:</p>
+      <blockquote>{{ vote.title }}</blockquote>
+      <p>You have {{ vote.timeLeft }} seconds left to vote.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="castVote('yes')">Yes</button>
+      <button type="button" class="btn btn-secondary" (click)="castVote('no')">No</button>
+    </div>
+  </ng-template>
 
   <!-- Choose Winner Screen -->
   <div *ngIf="game.state == 'choose_winner'">
@@ -54,9 +71,7 @@
               <fa-icon [icon]="waitIcon(player.id)"></fa-icon>
               {{ player.name }}
               <span *ngIf="player.czar"> (Czar)</span>
-              <span *ngIf="playerId == game.owner">
-                [ <a href='#' (click)='kickPlayer(player.id)'>Kick</a> ]
-              </span>
+              [ <a href='#' (click)='kickPlayer(player.id)'>Kick</a> ]
             </td>
             <td>{{ player.score }}</td>
           </tr>

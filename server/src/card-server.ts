@@ -18,6 +18,7 @@ interface Game {
   state: string;
   lastAction?: any;
   owner?: string;
+  vote?: any;
 }
 
 interface Player {
@@ -85,16 +86,15 @@ export class CardServer {
     });
   }
 
-  kickPlayer(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) return;
-    if (game.owner != m.player) return;
-    _.remove(game.players, player => player.id == m.winner);
+  kickPlayer(game: Game, id: string): void {
+    if (game.czar == id) {
+      this.nextCzar(game);
+    }
+    _.remove(game.players, player => player.id == id);
     this.broadcastGame(game);
   }
 
-  createGame(socket: any, m: Message): void {
-    let game = this.games[m.game];
+  createGame(game: Game, m: Message): void {
     if (game) {
       console.error(`Attempt to recreate game ${m.game}`);
     } else {
@@ -130,15 +130,28 @@ export class CardServer {
     return game;
   }
 
-  joinGame(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) {
-      console.log(`Invalid game ${m.game}`);
-      this.io.emit('message', {
-        event: 'invalid_game',
-      });
-      return
+  nextCzar(game: Game) {
+    let nextCzar = false;
+    let movedCzar = false;
+    for (const player of game.players) {
+      // Rotate the Czar.
+      if (!player.away && nextCzar && !movedCzar) {
+        game.czar = player.id;
+        player.czar = true;
+        nextCzar = false;
+        movedCzar = true;
+      } else if (player.czar && !movedCzar) {
+        nextCzar = true;
+        player.czar = false;
+      }
     }
+    if (nextCzar && !movedCzar) {
+      game.players[0].czar = true;
+      game.czar = game.players[0].id;
+    }
+  }
+
+  joinGame(game: Game, socket: any, m: Message): void {
     let player = _.find(game.players, p => p.id == m.player)
     if (!player) {
       console.log(`Player ${m.player} joined game ${game.id}`);
@@ -199,9 +212,7 @@ export class CardServer {
     })
   }
 
-  endRound(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) return;
+  endRound(game: Game, m: Message): void {
     if (game.czar != m.player) {
       console.log(`Player ${m.player} tried to end round, but czar is ${game.czar}`);
     }
@@ -209,14 +220,10 @@ export class CardServer {
     this.broadcastGame(game);
   }
 
-  chooseWinner(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) return;
+  chooseWinner(game: Game, m: Message): void {
     if (game.czar != m.player) {
       console.log(`Player ${m.player} tried to end round, but czar is ${game.czar}`);
     }
-    let nextCzar = false;
-    let movedCzar = false;
     for (const player of game.players) {
       for (const playedCard of player.playedCards) {
         // Remove played cards.
@@ -227,30 +234,14 @@ export class CardServer {
       if (player.id == m.winner) {
         player.score++;
       }
-
-      // Rotate the Czar.
-      if (!player.away && nextCzar && !movedCzar) {
-        game.czar = player.id;
-        player.czar = true;
-        nextCzar = false;
-        movedCzar = true;
-      } else if (player.czar && !movedCzar) {
-        nextCzar = true;
-        player.czar = false;
-      }
     }
-    if (nextCzar && !movedCzar) {
-      game.players[0].czar = true;
-      game.czar = game.players[0].id;
-    }
+    this.nextCzar(game);
     game.state = 'play';
     this.drawBlackCard(game);
     this.broadcastGame(game);
   }
 
-  playCard(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) return;
+  playCard(game: Game, m: Message): void {
     for (const player of game.players) {
       if (player.id != m.player) continue;
 
@@ -273,9 +264,7 @@ export class CardServer {
     this.broadcastGame(game);
   }
 
-  setPlayerName(socket: any, m: Message): void {
-    let game = this.games[m.game];
-    if (!game) return;
+  setPlayerName(game: Game, m: Message): void {
     for (const player of game.players) {
       if (player.id == m.player) {
         player.name = m.text;
@@ -288,31 +277,124 @@ export class CardServer {
     this.broadcastGame(game);
   }
 
+  availablePlayers(game: Game): number {
+    return _.filter(game.players, p => !p.away).length;
+  }
+
+  startVote(game: Game, m: Message): void {
+    game.vote = {
+      title: m.text,
+      timeout: m.args.timeout || 30,
+      votes: {},
+      required: Math.ceil(this.availablePlayers(game) / 2),
+      args: m.args,
+    };
+    for (const player of game.players) {
+      game.vote.votes[player.id] = 'unknown';
+    }
+    game.vote.votes[m.player] = 'yes';
+    this.broadcast(game, {
+      event: 'vote_start',
+      args: game.vote,
+    })
+    game.vote.timer = setTimeout(() => {
+      if (!game.vote) return;
+      console.log(`Timed out vote ${game.vote.title}`);
+      this.broadcast(game, {
+        event: 'vote_failed',
+        text: 'Vote expired',
+      })
+      game.vote = null;
+    }, game.vote.timeout * 1000);
+    console.log(game.vote.votes);
+    console.log(`Start vote "${game.vote.title} - ${game.vote.required} votes required to pass`);
+  }
+
+  vote(game: Game, m: Message): void {
+    if (!game.vote) {
+      return;
+    }
+    game.vote.votes[m.player] = m.text;
+    this.broadcast(game, {
+      event: 'vote_update',
+      args: game.vote,
+    })
+    // See if there is a resolution.
+    console.log(`Got a vote "${m.text}" for "${game.vote.title}"`);
+    console.log(game.vote.votes);
+    const required = Math.ceil(this.availablePlayers(game) / 2);
+    console.log(`  required ${required} to resolve`);
+    const results = _.uniq(Object.values(game.vote.votes));
+    for (const result of results) {
+      if (result == 'unknown') {
+        continue;
+      }
+      const count = _.filter(Object.values(game.vote.votes), r => r == result).length;
+      console.log(`  ${result} has ${count} votes`);
+      if (count < required) {
+        continue;
+      }
+      console.log(`Vote "${game.vote.title}" has finished with result "${result}"`)
+      if (result == 'yes') {
+        if (game.vote.args.type == 'kick-player') {
+          this.kickPlayer(game, game.vote.args.player);
+        }
+        this.broadcast(game, {
+          event: 'vote_passed',
+          text: 'Vote passed',
+        })
+      }
+      else {
+        this.broadcast(game, {
+          event: 'vote_failed',
+          text: 'Vote failed',
+        })
+      }
+      return;
+    }
+  }
+
   handleMessage(socket: any, m: Message): void {
+    let game = this.games[m.game];
+    if (m.event == 'create_game') {
+      this.createGame(game, m);
+      return;
+    }
+
+    if (!game) {
+      console.log(` Invalid game ${m.game}`);
+      socket.emit('message', {
+        event: 'invalid_game',
+      });
+      return
+    }
+    if (m.event == 'join_game') {
+      this.joinGame(game, socket, m);
+      return;
+    }
     switch (m.event) {
-      case 'create_game':
-        this.createGame(socket, m);
-        break;
-      case 'kick_player':
-        this.kickPlayer(socket, m);
-        break;
-      case 'join_game':
-        this.joinGame(socket, m);
-        break;
       case 'play_card':
-        this.playCard(socket, m);
+        this.playCard(game, m);
         break;
       case 'end_round':
-        this.endRound(socket, m);
+        this.endRound(game, m);
         break;
       case 'set_player_name':
-        this.setPlayerName(socket, m);
+        this.setPlayerName(game, m);
         break;
       case 'choose_winner':
-        this.chooseWinner(socket, m);
+        this.chooseWinner(game, m);
+        break;
+      case 'start_vote':
+        this.startVote(game, m);
+        break;
+      case 'vote':
+        this.vote(game, m);
         break;
       default:
-        console.log(`Unknown message ${m.event}`);
+        console.log(` Unknown message $ {
+      m.event
+    } `);
         break;
     }
   }
@@ -331,7 +413,9 @@ export class CardServer {
   drawBlackCard(game: Game) {
     game.blackCard = game.cards.black.pop();
     if (!game.blackCard) {
-      console.error(`No more black cards available in game ${game.id}`);
+      console.error(` No more black cards available in game $ {
+      game.id
+    } `);
       return
     }
     this.broadcastGame(game);
@@ -341,7 +425,9 @@ export class CardServer {
     while (player.cards.length < 10) {
       const card = game.cards.white.pop();
       if (!card) {
-        console.error(`No more white cards available in game ${game.id}`);
+        console.error(` No more white cards available in game $ {
+      game.id
+    } `);
         return;
       }
       player.cards.push(card);
@@ -362,7 +448,9 @@ export class CardServer {
   private cleanGames() {
     for (const game of Object.values(this.games)) {
       if (game.lastAction.isBefore(moment().subtract(1, 'hours'))) {
-        console.log(`Expiring game ${game.id}`);
+        console.log(` Expiring game $ {
+      game.id
+    } `);
         delete this.games[game.id];
       }
     }

@@ -30,6 +30,7 @@
     "bootstrap": "^4.4.1",
     "express": "^4.17.1",
     "jquery": "^3.5.0",
+    "moment": "^2.24.0",
     "ngx-cookie-service": "^3.0.4",
     "rxjs": "~6.5.4",
     "socket.io": "^2.3.0",

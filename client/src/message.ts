@@ -8,5 +8,6 @@ export class Message {
   winner?: string;
   playedCards?: any;
   decks?: string[];
+  args?: any;
 }
 
