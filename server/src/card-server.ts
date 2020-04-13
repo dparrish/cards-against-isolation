@@ -264,7 +264,7 @@ export class CardServer {
         }
         if (!found) {
           console.log(`Player "${player.name}" tried to play invalid card "${playCard}"`);
-          return;
+          break;
         }
       }
       console.log(`Player "${player.name}" played cards ${m.cards}`);

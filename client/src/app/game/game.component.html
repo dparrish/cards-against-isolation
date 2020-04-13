@@ -86,11 +86,11 @@
       <div *ngIf='czar != playerId'>
         <div class='play-cards d-flex justify-content-center'>
           <app-card [black]='true' [content]="blackCard"></app-card>
-          <app-card *ngFor="let card of cardSlots; let i = index" [black]='false' [content]="card" (click)="removeCard(card)"></app-card>
+          <app-card *ngFor="let card of cardSlots; let i = index" [black]='false' [content]="card" (click)="removeCard(card)" [draggable]="cardSlots[i]" (dragstart)="startRemoveCard($event)" (drop)="dropPlayCard($event)" (dragover)="allowDrop($event)" [id]='"slot-" + i'></app-card>
         </div>
 
-        <div class='my-cards d-flex flex-row flex-wrap justify-content-around fixed-bottom'>
-          <app-card *ngFor="let card of myCards" (click)="playCard(card)" [content]="card"></app-card>
+        <div class='my-cards d-flex flex-row flex-wrap justify-content-around fixed-bottom' (drop)="dropRemoveCard($event)" (dragover)="allowDrop($event)">
+          <app-card *ngFor="let card of myCards" (click)="playCard(card)" [content]="card" draggable="true" (dragstart)="startPlayCard($event)"></app-card>
         </div>
       </div>
     </div>

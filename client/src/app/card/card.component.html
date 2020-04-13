@@ -1,9 +1,4 @@
-<div #card class="game-card flip-card" [class]="className" [style]="{'font-size': fontSize}" (click)="toggle()">
-  <div class="flip-card-inner">
-    <div *ngIf="!content" class="empty-card d-flex justify-content-center align-items-center"><i class="fas fa-ban"></i></div>
-    <div *ngIf="content" class="flip-card-front" [class]="cardClass" [innerHTML]="content"></div>
-    <div class="flip-card-back" [class]="cardClass">
-      Cards Against Isolation
-    </div>
-  </div>
+<div #card class="game-card flip-card" [class]="className" [style]="{'font-size': fontSize}" (click)="toggle()" [id]="id">
+  <div *ngIf="!content" class="empty-card d-flex justify-content-center align-items-center"><i class="fas fa-ban"></i></div>
+  <div *ngIf="content" class="flip-card-front" [class]="cardClass" [innerHTML]="content"></div>
 </div>

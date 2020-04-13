@@ -193,12 +193,7 @@ export class GameComponent implements OnInit {
       this.cardSlots[i] = card;
       break;
     }
-    this.socket.send({
-      event: 'play_card',
-      game: this.gameId,
-      player: this.playerId,
-      cards: this.playedCards,
-    });
+    this.sendCards();
   }
 
   removeCard(card: string) {
@@ -271,5 +266,80 @@ export class GameComponent implements OnInit {
       if (player.id == id) return faTimesCircle;
     }
     return faCheckCircle;
+  }
+
+  dragFrom = '';
+  dragCard = '';
+
+  startPlayCard(event) {
+    this.dragFrom = 'my';
+    this.dragCard = event.target.innerText;
+  }
+
+  startRemoveCard(event) {
+    if ($('empty-card', event.target).length) {
+      return false;
+    }
+    let t = event.target.childNodes[0];
+    if (_.includes(t.classList, 'game-card')) {
+      let m = t.id.match(/slot-([0-9+])/);
+      const i = parseInt(m[1]);
+      this.dragFrom = 'slot-' + i;
+      this.dragCard = t.innerText;
+    }
+    return true;
+  }
+
+  dropPlayCard(event) {
+    for (let t = event.target; t; t = t.parentNode) {
+      if (_.includes(t.classList, 'game-card')) {
+        // Play a card.
+        let m = t.id.match(/slot-([0-9+])/);
+
+        if (this.playedCards.length && this.dragFrom == 'my' && _.includes(this.playedCards, this.dragCard)) {
+          return;
+        }
+
+        this.playedCards[parseInt(m[1])] = this.dragCard;
+
+        m = this.dragFrom.match(/slot-([0-9+])/);
+        if (m) {
+          this.playedCards[parseInt(m[1])] = '';
+        }
+        this.dragCard = '';
+        this.dragFrom = '';
+        this.sendCards();
+        return;
+      }
+    }
+  }
+
+  sendCards() {
+    this.socket.send({
+      event: 'play_card',
+      game: this.gameId,
+      player: this.playerId,
+      cards: _.filter(this.playedCards, c => c),
+    });
+  }
+
+  dropRemoveCard(event) {
+    for (let i = 0; i < this.playedCards.length; i++) {
+      if (this.playedCards[i] == this.dragCard) {
+        this.playedCards[i] = '';
+        this.sendCards();
+        break;
+      }
+    }
+  }
+
+  allowDrop(event) {
+    for (let t = event.target; t; t = t.parentNode) {
+      if (_.includes(t.classList, 'empty-card')) {
+        event.preventDefault();
+        return true;
+      }
+    }
+    return false;
   }
 }

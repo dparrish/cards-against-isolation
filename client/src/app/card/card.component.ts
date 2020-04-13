@@ -12,6 +12,7 @@ export class CardComponent implements OnInit {
   @Input() flippable: boolean = false;
   @Input() back: boolean = false;
   @Input('class') className: string;
+  @Input() id: string;
   @ViewChild('card') div;
   cardClass: string;
 
