@@ -45,24 +45,25 @@ export class CardComponent implements OnInit {
   }
 
   get fontSize(): string {
+    const base = 0.8;
     if (this.content.length > 150) {
-      return '13pt';
+      return base * 1.4 + 'rem';
     };
     if (this.content.length > 125) {
-      return '14pt';
+      return base * 1.5 + 'rem';
     };
     if (this.content.length > 100) {
-      return '15pt';
+      return base * 1.6 + 'rem';
     };
     if (this.content.length > 75) {
-      return '16pt';
+      return base * 1.7 + 'rem';
     };
     if (this.content.length > 50) {
-      return '17pt';
+      return base * 1.8 + 'rem';
     };
     if (this.content.length > 20) {
-      return '18pt';
+      return base * 1.9 + 'rem';
     };
-    return '20pt';
+    return base * 2.0 + 'rem';
   }
 }
