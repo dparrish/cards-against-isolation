@@ -17,7 +17,7 @@ const DEFAULT_DECKS = [
 @Component({selector: 'app-create-game', templateUrl: './create-game.component.html', styleUrls: ['./create-game.component.css']})
 export class CreateGameComponent implements OnInit {
   decks = [];
-  gameId: string = 'test-game';
+  gameId: string = '';
   cardCount = 0;
   enabledDecks = DEFAULT_DECKS;
 

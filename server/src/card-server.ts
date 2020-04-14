@@ -162,7 +162,7 @@ export class CardServer {
         id: m.player,
         socket: socket,
         socketId: socket.id,
-        name: `Player ${game.players.length + 1}`,
+        name: m.text || `Player ${game.players.length + 1}`,
         away: false,
         score: 0,
         cards: [],
@@ -208,12 +208,10 @@ export class CardServer {
         };
         game.players.push(rando);
         this.playerDrawCards(game, rando);
+        const cardsToPlay = (game.blackCard.match(/_/g) || []).length || 1;
+        rando.playedCards = _.sampleSize(rando.cards, cardsToPlay);
+        console.log(`Rando plays ${rando.playedCards}`);
       }
-    }
-    if (rando) {
-      const cardsToPlay = (game.blackCard.match(/_/g) || []).length || 1;
-      rando.playedCards = _.sampleSize(rando.cards, cardsToPlay);
-      console.log(`Rando plays ${rando.playedCards}`);
     }
   }
 
@@ -281,7 +279,12 @@ export class CardServer {
     this.broadcast(game, update);
     game.state = 'play';
     this.drawBlackCard(game);
-    this.updateRando(game);
+    let rando = _.find(game.players, p => p.id == 'rando');
+    if (rando) {
+      const cardsToPlay = (game.blackCard.match(/_/g) || []).length || 1;
+      rando.playedCards = _.sampleSize(rando.cards, cardsToPlay);
+      console.log(`Rando plays ${rando.playedCards}`);
+    }
     this.broadcastGame(game);
   }
 

@@ -33,7 +33,6 @@ export class GameComponent implements OnInit {
   @ViewChild('voteModal') voteModal;
   title = 'Cards Against Isolation';
   gameId = 'abc123';
-  playerId: string;
   playerName: string;
   players: Player[] = [];
   randomizedPlayers: Player[] = [];
@@ -67,7 +66,6 @@ export class GameComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.playerId = this.getPlayerId();
     this.initIoConnection();
     this.gameId = this.route.snapshot.paramMap.get('id');
   }
@@ -79,6 +77,7 @@ export class GameComponent implements OnInit {
       this.playedCards = [];
       this.socket.send({
         event: 'join_game',
+        text: this.defaultPlayerName(),
         player: this.playerId,
         game: this.gameId,
       });
@@ -267,11 +266,11 @@ export class GameComponent implements OnInit {
     }
   }
 
-  getPlayerId(): string {
-    let id = this.cookie.get('player-id');
+  get playerId(): string {
+    let id = localStorage.getItem('player-id');
     if (!id) {
       id = uuid.v4();
-      this.cookie.set('player-id', id);
+      localStorage.setItem('player-id', id);
     }
     return id;
   }
@@ -293,6 +292,10 @@ export class GameComponent implements OnInit {
     });
   }
 
+  defaultPlayerName(): string {
+    return localStorage.getItem('player-name');
+  }
+
   editName(modal) {
     this.modalService.open(modal).result.then(result => {
       if (result == 'save') {
@@ -302,6 +305,7 @@ export class GameComponent implements OnInit {
           game: this.gameId,
           text: this.playerName,
         });
+        localStorage.setItem('player-name', this.playerName);
       }
     });
     return false;
