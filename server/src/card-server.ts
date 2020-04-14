@@ -195,7 +195,7 @@ export class CardServer {
     if (!this.rando) return;
 
     let rando = _.find(game.players, p => p.id == 'rando');
-    if (game.players.length == 2) {
+    if (game.players.length <= 2) {
       if (!rando) {
         rando = {
           id: 'rando',

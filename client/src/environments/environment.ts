@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  server_url: 'http://localhost:8080',
+  server_url: 'https://cai.cdd.net.au',
 };
 
 import 'zone.js/dist/zone-error';
